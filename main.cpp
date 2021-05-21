@@ -208,36 +208,36 @@ int main(int argc,char **argv)
 							}
 							try
 							{
-								std::optional<ancient::Decompressor> decompressor{std::in_place,packed->data()+scanPos,scanSize,false,true};
+								ancient::Decompressor decompressor{packed->data()+scanPos,scanSize,false,true};
 								// for formats that do not encode packed size.
 								// we will get it from decompressor
-								if (!decompressor->getPackedSize())
+								if (!decompressor.getPackedSize())
 								{
 									try
 									{
-										decompressor->decompress(true);
+										decompressor.decompress(true);
 									} catch (const std::bad_alloc&) {
 										fprintf(stderr,"Out of memory\n");
 										i++;
 										continue;
 									}
 								}
-								if (decompressor->getPackedSize())
+								if (decompressor.getPackedSize())
 								{
 									// final checks with the limited buffer and fresh decompressor
 									const uint8_t *finalData=packed->data()+i;
-									size_t finalSize=decompressor->getPackedSize();
-									std::optional<ancient::Decompressor> decompressor2{std::in_place,finalData,finalSize,true,true};
+									size_t finalSize=decompressor.getPackedSize();
+									ancient::Decompressor decompressor2{finalData,finalSize,true,true};
 									try
 									{
-										decompressor2->decompress(true);
+										decompressor2.decompress(true);
 									} catch (const std::bad_alloc&) {
 										fprintf(stderr,"Out of memory\n");
 										i++;
 										continue;
 									}
 									std::string outputName=std::string(argv[3])+"/file"+std::to_string(fileIndex++)+".pack";
-									printf("Found compressed stream at %zu, size %zu in file %s with type '%s', storing it into %s\n",i,decompressor2->getPackedSize(),name.c_str(),decompressor2->getName().c_str(),outputName.c_str());
+									printf("Found compressed stream at %zu, size %zu in file %s with type '%s', storing it into %s\n",i,decompressor2.getPackedSize(),name.c_str(),decompressor2.getName().c_str(),outputName.c_str());
 									writeFile(outputName,finalData,finalSize);
 									i+=finalSize;
 									continue;
