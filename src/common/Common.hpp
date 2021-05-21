@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-namespace ancient
+namespace ancient::internal
 {
 
 constexpr uint32_t FourCC(const char (&cc)[5]) noexcept
