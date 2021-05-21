@@ -117,6 +117,18 @@ void Decompressor::decompress(std::vector<uint8_t> &rawData,bool verify)
 	return m_impl->decompress(buffer, verify);
 }
 
+std::vector<uint8_t> Decompressor::decompress(bool verify)
+{
+	std::vector<uint8_t> result((m_impl->getRawSize())?m_impl->getRawSize():m_impl->getMaxRawSize());
+	{
+		internal::WrappedVectorBuffer buffer(result);
+		m_impl->decompress(buffer, verify);
+	}
+	result.resize(m_impl->getRawSize());
+	result.shrink_to_fit();
+	return result;
+}
+
 Decompressor::~Decompressor()
 {
 	// nothing needed

@@ -124,18 +124,10 @@ int main(int argc,char **argv)
 			return -1;
 		}
 
-		std::unique_ptr<std::vector<uint8_t>> raw;
+		std::vector<uint8_t> raw;
 		try
 		{
-			raw=std::make_unique<std::vector<uint8_t>>((decompressor->getRawSize())?decompressor->getRawSize():ancient::Decompressor::getMaxRawSize());
-		} catch (const std::bad_alloc&) {
-			fprintf(stderr,"Out of memory\n");
-			return -1;
-		}
-
-		try
-		{
-			decompressor->decompress(*raw,true);
+			raw=decompressor->decompress(true);
 		} catch (const ancient::DecompressionError&)
 		{
 			fprintf(stderr,"Decompression failed for %s\n",argv[2]);
@@ -144,10 +136,6 @@ int main(int argc,char **argv)
 		{
 			fprintf(stderr,"Verify (raw) failed for %s\n",argv[2]);
 			return -1;
-		}
-		try
-		{
-			raw->resize(decompressor->getRawSize());
 		} catch (const std::bad_alloc&) {
 			fprintf(stderr,"Out of memory\n");
 			return -1;
@@ -161,18 +149,18 @@ int main(int argc,char **argv)
 
 		if (cmd=="decompress")
 		{
-			writeFile(argv[3],*raw);
+			writeFile(argv[3],raw);
 			return 0;
 		} else {
 			auto verify{readFile(argv[3])};
-			if (raw->size()!=verify->size())
+			if (raw.size()!=verify->size())
 			{
 				fprintf(stderr,"Verify failed for %s and %s - sizes differ\n",argv[2],argv[3]);
 				return -1;
 			}
-			for (size_t i=0;i<raw->size();i++)
+			for (size_t i=0;i<raw.size();i++)
 			{
-				if (raw->data()[i]!=verify->data()[i])
+				if (raw.data()[i]!=verify->data()[i])
 				{
 					fprintf(stderr,"Verify failed for %s and %s - contents differ @ %zu\n",argv[2],argv[3],i);
 					return -1;
@@ -221,27 +209,33 @@ int main(int argc,char **argv)
 							try
 							{
 								std::optional<ancient::Decompressor> decompressor{std::in_place,packed->data()+scanPos,scanSize,false,true};
-
-								std::unique_ptr<std::vector<uint8_t>> raw;
-								try
-								{
-									raw=std::make_unique<std::vector<uint8_t>>((decompressor->getRawSize())?decompressor->getRawSize():ancient::Decompressor::getMaxRawSize());
-								} catch (const std::bad_alloc&) {
-									fprintf(stderr,"Out of memory\n");
-									i++;
-									continue;
-								}
 								// for formats that do not encode packed size.
 								// we will get it from decompressor
 								if (!decompressor->getPackedSize())
-									decompressor->decompress(*raw,true);
+								{
+									try
+									{
+										decompressor->decompress(true);
+									} catch (const std::bad_alloc&) {
+										fprintf(stderr,"Out of memory\n");
+										i++;
+										continue;
+									}
+								}
 								if (decompressor->getPackedSize())
 								{
 									// final checks with the limited buffer and fresh decompressor
 									const uint8_t *finalData=packed->data()+i;
 									size_t finalSize=decompressor->getPackedSize();
 									std::optional<ancient::Decompressor> decompressor2{std::in_place,finalData,finalSize,true,true};
-									decompressor2->decompress(*raw,true);
+									try
+									{
+										decompressor2->decompress(true);
+									} catch (const std::bad_alloc&) {
+										fprintf(stderr,"Out of memory\n");
+										i++;
+										continue;
+									}
 									std::string outputName=std::string(argv[3])+"/file"+std::to_string(fileIndex++)+".pack";
 									printf("Found compressed stream at %zu, size %zu in file %s with type '%s', storing it into %s\n",i,decompressor2->getPackedSize(),name.c_str(),decompressor2->getName().c_str(),outputName.c_str());
 									writeFile(outputName,finalData,finalSize);
