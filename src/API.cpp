@@ -138,12 +138,6 @@ size_t Decompressor::getImageOffset() const noexcept
 	return m_impl->_decompressor->getImageOffset();
 }
 
-void Decompressor::decompress(std::vector<uint8_t> &rawData,bool verify)
-{
-	internal::WrappedVectorBuffer buffer(rawData);
-	return m_impl->_decompressor->decompress(buffer, verify);
-}
-
 std::vector<uint8_t> Decompressor::decompress(bool verify)
 {
 	std::vector<uint8_t> result((m_impl->_decompressor->getRawSize())?m_impl->_decompressor->getRawSize():m_impl->_decompressor->getMaxRawSize());

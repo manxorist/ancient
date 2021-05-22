@@ -105,7 +105,6 @@ public:
 	// verify checksum if verify==true
 	// can throw DecompressionError if stream cant be unpacked
 	// can throw VerificationError if verify enabled and checksum does not match
-	void decompress(std::vector<uint8_t> &rawData,bool verify);
 	std::vector<uint8_t> decompress(bool verify);
 
 	~Decompressor();
