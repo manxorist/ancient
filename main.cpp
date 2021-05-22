@@ -143,7 +143,7 @@ int main(int argc,char **argv)
 
 		if (decompressor->getImageOffset() || decompressor->getImageSize())
 		{
-			printf("File %s is disk image, decompressed stream offset is %zu, full image size is %zu\n",argv[2],decompressor->getImageOffset(),decompressor->getImageSize());
+			printf("File %s is disk image, decompressed stream offset is %zu, full image size is %zu\n",argv[2],decompressor->getImageOffset().value(),decompressor->getImageSize().value());
 			printf("!!! Please note !!!\n!!! The destination will not be padded !!!\n\n");
 		}
 
@@ -226,7 +226,7 @@ int main(int argc,char **argv)
 								{
 									// final checks with the limited buffer and fresh decompressor
 									const uint8_t *finalData=packed->data()+i;
-									size_t finalSize=decompressor.getPackedSize();
+									size_t finalSize=decompressor.getPackedSize().value();
 									ancient::Decompressor decompressor2{finalData,finalSize,true,true};
 									try
 									{
@@ -237,7 +237,7 @@ int main(int argc,char **argv)
 										continue;
 									}
 									std::string outputName=std::string(argv[3])+"/file"+std::to_string(fileIndex++)+".pack";
-									printf("Found compressed stream at %zu, size %zu in file %s with type '%s', storing it into %s\n",i,decompressor2.getPackedSize(),name.c_str(),decompressor2.getName().c_str(),outputName.c_str());
+									printf("Found compressed stream at %zu, size %zu in file %s with type '%s', storing it into %s\n",i,decompressor2.getPackedSize().value(),name.c_str(),decompressor2.getName().c_str(),outputName.c_str());
 									writeFile(outputName,finalData,finalSize);
 									i+=finalSize;
 									continue;

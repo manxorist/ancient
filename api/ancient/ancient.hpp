@@ -9,6 +9,7 @@
 
 #include <exception>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -84,22 +85,22 @@ public:
 	static size_t getMaxPackedSize() noexcept;
 	static size_t getMaxRawSize() noexcept;
 
-	// PackedSize or RawSize are taken from the stream if available, 0 otherwise.
-	// for those compressors having 0 sizes, running decompression will update
-	// the values. (make sure to allocate big-enough buffer for decompression)
+	// PackedSize or RawSize are taken from the stream if available, std::nullopt otherwise.
+	// for those compressors having no known sizes, running decompression will update
+	// the values.
 	// There are exceptions: Some decompressors need to exact size of the packed data
 	// in order to decompress. For those providing a indefinitely size packed stream
 	// will not work
 	// use the "exactSizeKnown" flag for create to tell whether you know the size or not
-	size_t getPackedSize() const noexcept;
-	size_t getRawSize() const noexcept;
+	std::optional<size_t> getPackedSize() const noexcept;
+	std::optional<size_t> getRawSize() const noexcept;
 
 	// in case of disk image based formats the data does not necessarily start
-	// from logical beginnig of the image but it is offsetted inside the logical image
-	// (f.e. DMS). getDataOffset will return the offset (or 0 if not relevant or if offset does not exist)
-	// getImageSize will return the size of the the logical image, or 0 if not image-based format
-	size_t getImageSize() const noexcept;
-	size_t getImageOffset() const noexcept;
+	// from logical beginnig of the image but it is offsetted inside the logical image (f.e. DMS).
+	// getDataOffset will return the offset which can also be 0, or std::nullopt if not image-based format.
+	// getImageSize will return the size of the the logical image, or std::nullopt if not image-based format.
+	std::optional<size_t> getImageSize() const noexcept;
+	std::optional<size_t> getImageOffset() const noexcept;
 
 	// Actual decompression.
 	// verify checksum if verify==true

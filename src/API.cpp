@@ -118,24 +118,48 @@ size_t Decompressor::getMaxRawSize() noexcept
 	return internal::Decompressor::getMaxRawSize();
 }
 
-size_t Decompressor::getPackedSize() const noexcept
+std::optional<size_t> Decompressor::getPackedSize() const noexcept
 {
-	return m_impl->_decompressor->getPackedSize();
+	size_t packedSize=m_impl->_decompressor->getPackedSize();
+	if (packedSize==0)
+	{
+		return std::nullopt;
+	}
+	return packedSize;
 }
 
-size_t Decompressor::getRawSize() const noexcept
+std::optional<size_t> Decompressor::getRawSize() const noexcept
 {
-	return m_impl->_decompressor->getRawSize();
+	size_t rawSize=m_impl->_decompressor->getRawSize();
+	if (rawSize==0)
+	{
+		return std::nullopt;
+	}
+	return rawSize;
 }
 
-size_t Decompressor::getImageSize() const noexcept
+std::optional<size_t> Decompressor::getImageSize() const noexcept
 {
-	return m_impl->_decompressor->getImageSize();
+	size_t imageSize=m_impl->_decompressor->getImageSize();
+	size_t imageOffset=m_impl->_decompressor->getImageOffset();
+	bool isImage=((imageSize>0)||(imageOffset>0));
+	if (!isImage)
+	{
+		return std::nullopt;
+	}
+	return imageSize;
 }
 
-size_t Decompressor::getImageOffset() const noexcept
+std::optional<size_t> Decompressor::getImageOffset() const noexcept
 {
-	return m_impl->_decompressor->getImageOffset();
+	size_t imageSize=m_impl->_decompressor->getImageSize();
+	size_t imageOffset=m_impl->_decompressor->getImageOffset();
+	bool isImage=((imageSize>0)||(imageOffset>0));
+	if (!isImage)
+	{
+		return std::nullopt;
+	}
+	return imageOffset;
 }
 
 std::vector<uint8_t> Decompressor::decompress(bool verify)
