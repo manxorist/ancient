@@ -20,7 +20,7 @@ namespace ancient
 
 namespace internal
 {
-class Decompressor;
+class DecompressorImpl;
 }
 
 inline namespace APIv2
@@ -112,13 +112,13 @@ public:
 
 private:
 
-	std::unique_ptr<internal::Decompressor> m_impl;
+	std::unique_ptr<internal::DecompressorImpl> m_impl;
 
 private:
 
 	Decompressor(const Decompressor&)=delete;
 	Decompressor& operator=(const Decompressor&)=delete;
-	
+
 };
 
 }
